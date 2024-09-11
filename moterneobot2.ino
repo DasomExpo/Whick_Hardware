@@ -27,36 +27,36 @@ void loop() {
 void processCommand(String command) {
   if (command.startsWith("left++")) {
     Serial.println("Turning left++");
-    servoLeft.write(0);  // 왼쪽으로 최대 회전
-    servoRight.write(180); // 오른쪽으로 최대 회전
+    servoLeft.write(1520);   // 왼쪽으로 최대 회전
+    servoRight.write(1300); // 오른쪽으로 최대 회전
   } else if (command.startsWith("left+")) {
     Serial.println("Turning left+");
-    servoLeft.write(30); // 왼쪽으로 중간 회전
-    servoRight.write(150); // 오른쪽으로 중간 회전
+    servoLeft.write(1550);  // 왼쪽으로 중간 회전
+    servoRight.write(1300); // 오른쪽으로 중간 회전
   } else if (command.startsWith("left")) {
     Serial.println("Turning left");
-    servoLeft.write(60);  // 왼쪽으로 약간 회전
-    servoRight.write(120); // 오른쪽으로 약간 회전
+    servoLeft.write(1500);   // 왼쪽으로 약간 회전
+    servoRight.write(1300); // 오른쪽으로 약간 회전
   } else if (command.startsWith("right++")) {
     Serial.println("Turning right++");
-    servoLeft.write(180); // 오른쪽으로 최대 회전
-    servoRight.write(0); // 왼쪽으로 최대 회전
+    servoLeft.write(1700);  // 오른쪽으로 최대 회전
+    servoRight.write(1480);   // 왼쪽으로 최대 회전
   } else if (command.startsWith("right+")) {
     Serial.println("Turning right+");
-    servoLeft.write(150); // 오른쪽으로 중간 회전
-    servoRight.write(30); // 왼쪽으로 중간 회전
+    servoLeft.write(1700);  // 오른쪽으로 중간 회전
+    servoRight.write(1450);  // 왼쪽으로 중간 회전
   } else if (command.startsWith("right")) {
     Serial.println("Turning right");
-    servoLeft.write(120); // 오른쪽으로 약간 회전
-    servoRight.write(60); // 왼쪽으로 약간 회전
+    servoLeft.write(1700);  // 오른쪽으로 약간 회전
+    servoRight.write(1430);  // 왼쪽으로 약간 회전
   } else if (command.startsWith("front")) {
     Serial.println("Moving forward");
-    servoLeft.write(1400);  // 정면
-    servoRight.write(1600); // 정면
+    servoLeft.write(1520);   // 서보 모터를 정면으로
+    servoRight.write(1480);  // 서보 모터를 정면으로
   } else if (command.startsWith("stop")) {
     Serial.println("Stopping");
-    servoLeft.write(1500);  // 서보 모터 정지 (중립 위치)
-    servoRight.write(1500); // 서보 모터 정지 (중립 위치)
+    servoLeft.write(1500);   // 서보 모터 정지 (중립 위치)
+    servoRight.write(1500);  // 서보 모터 정지 (중립 위치)
   } else {
     Serial.println("Unknown command: " + command);
   }
