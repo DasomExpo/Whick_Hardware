@@ -1,12 +1,12 @@
 #include <ESP8266WiFi.h>
 
-const char* ssid = "kimjihoo";       // Wi-Fi SSID
-const char* password = "2121830kim!!";  // Wi-Fi 비밀번호
+const char* ssid = "kimjihoo0525";
+const char* password = "2121830kim!!";
 
 WiFiServer server(80);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200);  // Serial communication with Arduino
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -15,7 +15,7 @@ void setup() {
   }
 
   Serial.println("Connected to WiFi");
-  Serial.println(WiFi.localIP());  // ESP8266의 IP 주소 출력
+  Serial.println(WiFi.localIP());
   server.begin();
   Serial.println("Server started");
 }
@@ -24,9 +24,9 @@ void loop() {
   WiFiClient client = server.available();
 
   if (client) {
-    Serial.println("Client connected");
     String request = client.readStringUntil('\r');
     client.flush();
+
     Serial.println("Request: " + request);
 
     if (request.indexOf("/front") != -1) {
