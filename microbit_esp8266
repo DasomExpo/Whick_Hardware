@@ -1,0 +1,67 @@
+#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
+
+// 마이크로비트와의 통신을 위한 SoftwareSerial 설정
+SoftwareSerial microbitSerial(2, 3); // RX = 2, TX = 3
+
+// Wi-Fi 설정
+const char* ssid = "kimjihoo0525";
+const char* password = "2121830kim!!";
+
+WiFiServer server(80);  // HTTP 서버 실행 (포트 80)
+
+void setup() {
+  Serial.begin(115200);  // ESP8266과의 시리얼 통신
+  microbitSerial.begin(115200);  // 마이크로비트와의 SoftwareSerial 통신
+
+  // Wi-Fi 연결 설정
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("WiFi 연결 중...");
+  }
+
+  Serial.println("WiFi 연결 완료");
+  server.begin();  // 서버 시작
+}
+
+void loop() {
+  // 클라이언트가 연결되면 처리
+  WiFiClient client = server.available();
+  
+  if (client) {
+    String request = client.readStringUntil('\r');  // 클라이언트 요청 수신
+    client.flush();
+
+    Serial.println("Request: " + request);
+
+    // 클라이언트의 요청에 따라 명령 전달 (ESP8266 → 마이크로비트)
+    if (request.indexOf("/front") != -1) {
+      Serial.println("front");
+      microbitSerial.println("front");
+    } else if (request.indexOf("/left+") != -1) {
+      Serial.println("left+");
+      microbitSerial.println("left+");
+    } else if (request.indexOf("/left") != -1) {
+      Serial.println("left");
+      microbitSerial.println("left");
+    } else if (request.indexOf("/right+") != -1) {
+      Serial.println("right+");
+      microbitSerial.println("right+");
+    } else if (request.indexOf("/right") != -1) {
+      Serial.println("right");
+      microbitSerial.println("right");
+    } else if (request.indexOf("/stop") != -1) {
+      Serial.println("stop");
+      microbitSerial.println("stop");
+    }
+
+    client.stop();  // 클라이언트 연결 종료
+  }
+
+  // 마이크로비트에서 데이터 수신 (마이크로비트 → ESP8266)
+  if (microbitSerial.available()) {
+    String response = microbitSerial.readString();
+    Serial.println("Microbit: " + response);  // 마이크로비트의 응답을 ESP8266 시리얼로 출력
+  }
+}
