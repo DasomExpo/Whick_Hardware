@@ -1,0 +1,78 @@
+from microbit import *
+
+# 화살표 이미지 정의
+ARROW_SE = Image("09999:"
+                 "00099:"
+                 "00909:"
+                 "09009:"
+                 "90000")
+
+ARROW_SW = Image("99990:"
+                 "99000:"
+                 "90900:"
+                 "90090:"
+                 "00009")
+
+ARROW_S = Image("00900:"
+                 "00090:"
+                 "99999:"
+                 "00090:"
+                 "00900")
+
+ARROW_W = Image("00900:"
+                 "09000:"
+                 "99999:"
+                 "09000:"
+                 "00900")
+
+# UART 초기화
+uart.init(baudrate=115200)
+
+# 현재 상태를 저장하는 변수
+current_display = None
+
+while True:
+    try:
+        # UART 데이터가 있으면 읽기
+        if uart.any():
+            data = uart.read().decode('utf-8').strip()
+            print("수신된 데이터:", data)  # 디버깅을 위한 출력
+
+            # 명령에 따라 이미지 표시
+            if data == "left":
+                display.show(ARROW_SE)
+                current_display = ARROW_SE
+            elif data == "left+":
+                display.show(ARROW_S)
+                current_display = ARROW_S
+            elif data == "right":
+                display.show(ARROW_SW)
+                current_display = ARROW_SW
+            elif data == "right+":
+                display.show(ARROW_W)
+                current_display = ARROW_W
+            elif data == "front":
+                display.show(Image.ARROW_N)
+                current_display = Image.ARROW_N
+            elif data == "stop":
+                display.show(Image.NO)
+                current_display = Image.NO
+            else:
+                # 알 수 없는 데이터가 들어온 경우
+                print("알 수 없는 명령:", data)
+                display.clear()
+                current_display = None
+
+        # 현재 상태 유지 (매번 초기화하지 않음)
+        if current_display:
+            display.show(current_display)
+        else:
+            display.clear()
+
+        sleep(10)
+
+    except Exception as e:
+        # 예외 처리: 문제가 발생하면 오류 메시지 출력
+        print("오류 발생:", str(e))
+        display.clear()
+        sleep(1000)
