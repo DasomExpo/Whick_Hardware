@@ -1,0 +1,27 @@
+#include <SoftwareSerial.h>
+
+// 마이크로비트를 위한 SoftwareSerial 정의
+SoftwareSerial microbitSerial(2, 3); // RX = 2, TX = 3
+
+void setup() {
+  Serial.begin(115200);  // ESP8266과 통신 (하드웨어 시리얼 사용)
+  microbitSerial.begin(115200);  // 마이크로비트와 통신 (SoftwareSerial 사용)
+}
+
+void loop() {
+  // ESP8266에서 데이터 수신
+  if (Serial.available()) {
+    String command = Serial.readString();
+    
+    // 수신된 명령을 마이크로비트로 전달
+    microbitSerial.println(command);
+  }
+
+  // 마이크로비트에서 데이터 수신
+  if (microbitSerial.available()) {
+    String response = microbitSerial.readString();
+    
+    // 수신된 데이터를 ESP8266으로 출력
+    Serial.println(response);
+  }
+}
