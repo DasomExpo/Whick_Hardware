@@ -129,21 +129,21 @@ with mp_face_mesh.FaceMesh(
                     if not toggle_stop:  # "stop" 상태가 아닐 때만 방향 계산
                         if direction not in ["stop", "unknown"]:
                             if yaw <= -160 or yaw >= 160:
-                                direction = "front"  # 정면
+                                direction = "front"  
                             elif yaw < 0:
                                 if yaw > -132:
-                                    direction = "left++"  # 왼쪽 약간
+                                    direction = "left++"  
                                 elif yaw > -145:
-                                    direction = "left+"  # 왼쪽 조금 더
+                                    direction = "left+"  
                                 elif yaw > -160:
-                                    direction = "left"  # 왼쪽 많이
+                                    direction = "left" 
                             else:
                                 if yaw < 132:
-                                    direction = "right++"  # 오른쪽 약간
+                                    direction = "right++"
                                 elif yaw < 145:
-                                    direction = "right+"  # 오른쪽 조금 더
+                                    direction = "right+"
                                 elif yaw < 160:
-                                    direction = "right"  # 오른쪽 많이     
+                                    direction = "right"   
                     
                 except (IndexError, AttributeError):
                     direction = "unknown"  # 랜드마크 인덱스 오류나 속성 오류 발생 시 방향을 "unknown"으로 설정
