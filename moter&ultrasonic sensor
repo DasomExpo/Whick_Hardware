@@ -1,0 +1,122 @@
+#include <Servo.h>
+
+// 서보 모터 객체 생성
+Servo servoLeft;  // 왼쪽 서보 모터
+Servo servoRight; // 오른쪽 서보 모터
+String cmd = "";  // 명령어 저장 변수
+
+// 초음파 센서 핀 설정
+const int trigPin = 9;   // Trig 핀
+const int echoPin = 10;  // Echo 핀
+const int obstacleThreshold = 3; // 장애물 감지 거리 (cm)
+
+// 장애물 감지 상태 변수
+bool obstacleDetected = false;
+
+void setup() {
+  Serial.begin(115200); 
+  servoLeft.attach(12); 
+  servoRight.attach(13);
+
+  // 초음파 센서 핀 모드 설정
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  // 초음파 센서로 거리 측정
+  int distance = measureDistance();
+
+  // 후방에 장애물이 3cm 이내에 있으면 멈춤
+  if (distance > 0 && distance <= obstacleThreshold) {
+    if (!obstacleDetected) {
+      stopMotors();
+      obstacleDetected = true;
+      Serial.println("Obstacle detected behind. Stopping.");
+    }
+  } else {
+    if (obstacleDetected) {
+      obstacleDetected = false;
+      Serial.println("Obstacle cleared.");
+    }
+  }
+
+  // 장애물이 감지되지 않았을 때만 명령어 처리
+  if (!obstacleDetected) {
+    // 명령어 처리
+    if (Serial.available()) {
+      char c = Serial.read();
+      if (c == '\n' || c == '\r') {
+        processCommand(cmd);
+        cmd = ""; 
+      } else {
+        cmd += c;
+      }
+    }
+  } else {
+    // 장애물 감지 중에는 입력 버퍼 비우기
+    if (Serial.available()) {
+      Serial.read(); // 읽어서 버림
+    }
+  }
+}
+
+void processCommand(String command) {
+  if (command.startsWith("left++")) {
+    servoLeft.writeMicroseconds(1520);
+    servoRight.writeMicroseconds(1300);
+  } else if (command.startsWith("left+")) {
+    servoLeft.writeMicroseconds(1550);
+    servoRight.writeMicroseconds(1300);
+  } else if (command.startsWith("left")) {
+    servoLeft.writeMicroseconds(1580);
+    servoRight.writeMicroseconds(1300);
+  } else if (command.startsWith("right++")) {
+    servoLeft.writeMicroseconds(1700);
+    servoRight.writeMicroseconds(1480);
+  } else if (command.startsWith("right+")) {
+    servoLeft.writeMicroseconds(1700);
+    servoRight.writeMicroseconds(1450);
+  } else if (command.startsWith("right")) {
+    servoLeft.writeMicroseconds(1700);
+    servoRight.writeMicroseconds(1400);
+  } else if (command.startsWith("front")) {
+    servoLeft.writeMicroseconds(1520);
+    servoRight.writeMicroseconds(1480);
+  } else if (command.startsWith("stop")) {
+    stopMotors();
+  } else if (command.startsWith("back")) {
+    servoLeft.writeMicroseconds(1480); // 후진 속도 조정
+    servoRight.writeMicroseconds(1520);
+  }
+}
+
+// 모터 정지 함수
+void stopMotors() {
+  servoLeft.writeMicroseconds(1500);
+  servoRight.writeMicroseconds(1500);
+}
+
+// 초음파 센서로 거리 측정 함수
+int measureDistance() {
+  // Trig 핀에 10μs 펄스 전송
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Echo 핀으로부터 펄스 수신
+  long duration = pulseIn(echoPin, HIGH, 30000); // 타임아웃 30ms (최대 5m)
+
+  if (duration == 0) {
+    // 펄스 수신 실패
+    return -1;
+  }
+
+  // 거리 계산 (단위: cm)
+  int distance = duration * 0.034 / 2;
+
+  return distance;
+}
