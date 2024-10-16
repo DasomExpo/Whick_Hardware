@@ -1,0 +1,66 @@
+// 라디오 그룹 설정
+radio.setGroup(1)
+
+// 라디오 메시지 수신 이벤트 핸들러
+radio.onReceivedString(function (receivedString) {
+    if (receivedString == "left" || receivedString == "left+" || receivedString == "left++") {
+        controlLeft(receivedString)
+    } else if (receivedString == "right" || receivedString == "right+" || receivedString == "right++") {
+        controlRight(receivedString)
+    } else if (receivedString == "front") {
+        moveForward()
+    } else if (receivedString == "stop") {
+        stopMoving()
+    } else {
+        // 알 수 없는 명령; 안전을 위해 로봇 정지
+        stopMoving()
+    }
+})
+
+// 좌회전 제어 함수
+function controlLeft(direction: string) {
+    if (direction == "left") {
+        // 약한 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 25)
+    } else if (direction == "left+") {
+        // 중간 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 35)
+    } else if (direction == "left++") {
+        // 급격한 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 50)
+    }
+}
+
+// 우회전 제어 함수
+function controlRight(direction: string) {
+    if (direction == "right") {
+        // 약한 우회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 25)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 10)
+    } else if (direction == "right+") {
+        // 중간 우회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 35)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 10)
+    } else if (direction == "right++") {
+        // 급격한 우회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 50)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 10)
+    }
+}
+
+// 전진 함수
+function moveForward() {
+    DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 40)
+    DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 40)
+}
+
+// 로봇 정지 함수
+function stopMoving() {
+    DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 0)
+    DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 0)
+}
+
+//https://makecode.microbit.org/#editor 이 사이트를 활용하여 만들었습니다.
