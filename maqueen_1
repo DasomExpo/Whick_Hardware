@@ -1,37 +1,63 @@
-// 라디오 그룹 설정
-radio.setGroup(1)
+let distance = 0
+let obstacleDetectedTime = 0
+let isReversing = false
 
-// 라디오 메시지 수신 이벤트 핸들러
-radio.onReceivedString(function (receivedString) {
-    if (receivedString == "left" || receivedString == "left+" || receivedString == "left++") {
-        controlLeft(receivedString)
-    } else if (receivedString == "right" || receivedString == "right+" || receivedString == "right++") {
-        controlRight(receivedString)
-    } else if (receivedString == "front") {
-        moveForward()
-    } else if (receivedString == "stop") {
-        stopMoving()
-    } else {
-        // 알 수 없는 명령; 안전을 위해 로봇 정지
-        stopMoving()
+basic.forever(function () {
+    // Trig 핀에 신호 보내기 (P8)
+    pins.digitalWritePin(DigitalPin.P8, 0)
+    control.waitMicros(2)
+    pins.digitalWritePin(DigitalPin.P8, 1)
+    control.waitMicros(10)
+    pins.digitalWritePin(DigitalPin.P8, 0)
+
+    // Echo 핀으로부터 펄스 길이 측정 (P12)
+    let duration = pins.pulseIn(DigitalPin.P12, PulseValue.High)
+
+    // 유효한 펄스를 받은 경우에만 거리 계산
+    if (duration > 0) {
+        distance = duration / 58.2
     }
+
+    // 장애물이 5cm 이내에 있는 경우 정지하고 타이머 시작
+    if (distance > 0 && distance <= 5) {
+        if (!isReversing) {
+            stopMoving()
+            if (obstacleDetectedTime == 0) {
+                obstacleDetectedTime = input.runningTime()
+            } else if (input.runningTime() - obstacleDetectedTime >= 3000) {
+                // 3초 동안 장애물이 사라지지 않으면 후진 시작
+                isReversing = true
+                obstacleDetectedTime = 0
+                moveBackward()
+            }
+        }
+    } else {
+        obstacleDetectedTime = 0
+        if (isReversing) {
+            if (distance > 5) {
+                isReversing = false
+                stopMoving()
+            } else {
+                // 장애물이 5cm 이내에 있을 경우 후진
+                moveBackward()
+            }
+        }
+    }
+
+    basic.pause(100)
 })
 
-// 좌회전 제어 함수
-function controlLeft(direction: string) {
-    if (direction == "left") {
-        // 약한 좌회전
-        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
-        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 25)
-    } else if (direction == "left+") {
-        // 중간 좌회전
-        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
-        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 35)
-    } else if (direction == "left++") {
-        // 급격한 좌회전
-        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
-        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 50)
-    }
+// 전진 함수
+function moveForward() {
+    DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 40)
+    DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 40)
+}
+
+// 후진 함수
+function moveBackward() {
+    DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CCW, 40)
+    DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CCW, 40)
+    basic.pause(500) // 후진 안정성을 위해 잠시 대기
 }
 
 // 우회전 제어 함수
@@ -51,16 +77,50 @@ function controlRight(direction: string) {
     }
 }
 
-// 전진 함수
-function moveForward() {
-    DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 40)
-    DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 40)
-}
-
 // 로봇 정지 함수
 function stopMoving() {
     DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 0)
     DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 0)
 }
 
-//https://makecode.microbit.org/#editor 이 사이트를 활용하여 만들었습니다.
+// 좌회전 제어 함수
+function controlLeft(direction: string) {
+    if (direction == "left") {
+        // 약한 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 25)
+    } else if (direction == "left+") {
+        // 중간 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 35)
+    } else if (direction == "left++") {
+        // 급격한 좌회전
+        DFRobotMaqueenPlus.mototRun(Motors.M1, Dir.CW, 10)
+        DFRobotMaqueenPlus.mototRun(Motors.M2, Dir.CW, 50)
+    }
+}
+
+// 라디오 메시지 수신 이벤트 핸들러
+radio.onReceivedString(function (receivedString) {
+    if (distance > 5 && !isReversing) {
+        if (receivedString == "left" || receivedString == "left+" || receivedString == "left++") {
+            controlLeft(receivedString)
+        } else if (receivedString == "right" || receivedString == "right+" || receivedString == "right++") {
+            controlRight(receivedString)
+        } else if (receivedString == "front") {
+            moveForward()
+        } else if (receivedString == "stop") {
+            stopMoving()
+        } else {
+            // 알 수 없는 명령; 안전을 위해 로봇 정지
+            stopMoving()
+        }
+    } else {
+        stopMoving()
+    }
+})
+
+// 라디오 그룹 설정
+radio.setGroup(1)
+
+//https://makecode.microbit.org/# 해당 사이트를 활용했습니다. javascript
